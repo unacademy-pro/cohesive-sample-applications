@@ -1,0 +1,28 @@
+POST http://localhost:5001/oauth2/provision?project=fsg&environment=staging&name=github-app
+Content-Type: application/json
+Authorization: Bearer thisisauthtoken
+
+{
+  "params": {
+    "url": "http://127.0.0.1:5000/callback"
+  }
+}
+
+###
+POST http://localhost:5001/oauth2?project=fsg&environment=staging&name=github-app-2
+Content-Type: application/json
+Authorization: Bearer thisisauthtoken
+
+{
+  "params": {
+    "url": "http://127.0.0.1:5000/callback"
+  }
+}
+
+###
+DELETE http://localhost:5001/oauth2/provision?project=fsg&environment=staging&name=github-app
+Authorization: Bearer thisisauthtoken
+
+###
+DELETE http://localhost:5001/oauth2/provision?project=fsg&environment=staging&name=github-app-2
+Authorization: Bearer thisisauthtoken
