@@ -45,13 +45,17 @@ def oauth2_provision():
                 result.proxy_url = proxy_url
                 session.commit()
 
-            return json.dumps({ "env_vars": {
-                "CLIENT_ID": result.client_id,
-                "CLIENT_SECRET": result.client_secret,
-                "CALLBACK_URL": result.callback_url,
-                "AUTH_URL": result.auth_url,
-                "TOKEN_URL": result.token_url,
-            }})
+            body = {
+                "env_vars": {
+                    "CLIENT_ID": result.client_id,
+                    "CLIENT_SECRET": result.client_secret,
+                    "CALLBACK_URL": result.callback_url,
+                    "AUTH_URL": result.auth_url,
+                    "TOKEN_URL": result.token_url,
+                }
+            }
+            response = Response(body, 200, [('Content-Type', "application/json")])
+            return response
 
     if request.method == 'DELETE':
         with Session(engine) as session:
