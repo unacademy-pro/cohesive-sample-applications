@@ -45,13 +45,12 @@ def oauth2_provision():
                 result.proxy_url = proxy_url
                 session.commit()
 
-            env_var_prefix = name.upper().replace('-', '_')
             return json.dumps({
-                f"{env_var_prefix}_CLIENT_ID": result.client_id,
-                f"{env_var_prefix}_CLIENT_SECRET": result.client_secret,
-                f"{env_var_prefix}_CALLBACK_URL": result.callback_url,
-                f"{env_var_prefix}_AUTH_URL": result.auth_url,
-                f"{env_var_prefix}_TOKEN_URL": result.token_url,
+                "CLIENT_ID": result.client_id,
+                "CLIENT_SECRET": result.client_secret,
+                "CALLBACK_URL": result.callback_url,
+                "AUTH_URL": result.auth_url,
+                "TOKEN_URL": result.token_url,
             })
 
     if request.method == 'DELETE':
