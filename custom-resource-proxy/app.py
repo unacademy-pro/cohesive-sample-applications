@@ -54,7 +54,7 @@ def oauth2_provision():
                     "TOKEN_URL": result.token_url,
                 }
             }
-            response = Response(body, 200, [('Content-Type', "application/json")])
+            response = Response(json.dumps(body), 200, [('Content-Type', "application/json")])
             return response
 
     if request.method == 'DELETE':
