@@ -76,14 +76,17 @@ def callback(name):
         result = session.query(OAuth2App).filter_by(name=name).first()
         if result is None:
             return "Not Found", 404
-        if result.proxy_url is None:
+        if result.proxy_url is None or result.proxy_url == '':
             return "Proxy URL missing", 500
 
         proxy_url = result.proxy_url
 
+    url = f"{proxy_url}?{request.query_string.decode('UTF-8')}"
+    print(f"Proxying the request to {url}")
+
     resp = requests.request(
         method=request.method,
-        url=f"{proxy_url}?{request.query_string.decode('UTF-8')}",
+        url=url,
         headers={key: value for (key, value) in request.headers if key != 'Host'},
         data=request.get_data(),
         cookies=request.cookies,
