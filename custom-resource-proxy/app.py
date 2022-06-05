@@ -2,7 +2,7 @@ import json
 import os
 
 import requests
-from flask import Flask, request, Response
+from flask import Flask, request, Response, redirect
 from flask_httpauth import HTTPTokenAuth
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -98,16 +98,18 @@ def callback(name):
     url = f"{proxy_url}?{request.query_string.decode('UTF-8')}"
     print(f"Proxying the request to {url}")
 
-    resp = requests.request(
-        method=request.method,
-        url=url,
-        headers={key: value for (key, value) in request.headers if key != 'Host' and not key.startswith('X-')},
-        data=request.get_data(),
-        cookies=request.cookies,
-        allow_redirects=False)
+    return redirect(url)
 
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
-
-    response = Response(resp.content, resp.status_code, headers)
-    return response
+    # resp = requests.request(
+    #     method=request.method,
+    #     url=url,
+    #     headers={key: value for (key, value) in request.headers if key != 'Host' and not key.startswith('X-')},
+    #     data=request.get_data(),
+    #     cookies=request.cookies,
+    #     allow_redirects=False)
+    #
+    # excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    # headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
+    #
+    # response = Response(resp.content, resp.status_code, headers)
+    # return response
