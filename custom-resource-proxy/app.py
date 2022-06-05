@@ -8,6 +8,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from models import Base, OAuth2App
+import logging
+from http.client import HTTPConnection
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
@@ -15,6 +17,17 @@ auth = HTTPTokenAuth(scheme='Bearer')
 
 engine = create_engine(f"mysql+pymysql://{os.environ.get('DB_USERNAME')}:{os.environ.get('DB_PASSWORD')}@{os.environ.get('DB_HOSTNAME')}:{os.environ.get('DB_PORT')}/{os.environ.get('DB_DATABASE')}", echo=True, future=True)
 Base.metadata.create_all(engine)
+
+log = logging.getLogger('urllib3')
+log.setLevel(logging.DEBUG)
+
+# logging from urllib3 to console
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+log.addHandler(ch)
+
+# print statements from `http.client.HTTPConnection` to console/stdout
+HTTPConnection.debuglevel = 1
 
 
 @auth.verify_token
@@ -80,6 +93,7 @@ def callback(name):
             return "Proxy URL missing", 500
 
         proxy_url = result.proxy_url
+        session.commit()
 
     url = f"{proxy_url}?{request.query_string.decode('UTF-8')}"
     print(f"Proxying the request to {url}")
@@ -93,8 +107,7 @@ def callback(name):
         allow_redirects=False)
 
     excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
+    headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers]
 
     response = Response(resp.content, resp.status_code, headers)
     return response
