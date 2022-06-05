@@ -107,7 +107,7 @@ def callback(name):
         allow_redirects=False)
 
     excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers and not name.lower.startswith('x-')]
+    headers = [(name, value) for (name, value) in resp.raw.headers.items() if name.lower() not in excluded_headers and not name.lower().startswith('x-')]
 
     response = Response(resp.content, resp.status_code, headers)
     return response
