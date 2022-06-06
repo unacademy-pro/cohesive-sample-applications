@@ -226,3 +226,5 @@ dmypy.json
 cython_debug/
 
 *.env
+*.db
+*.http
