@@ -4,20 +4,18 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class OAuth2App(Base):
-    __tablename__ = "oauth2_app"
+class App(Base):
+    __tablename__ = "app"
 
     name = Column(String(100), primary_key=True, nullable=False)
-    client_id = Column(String(100), nullable=False)
-    client_secret = Column(String(100), nullable=False)
-    callback_url = Column(String(1000), nullable=False)
-    auth_url = Column(String(1000), nullable=False)
-    token_url = Column(String(1000), nullable=False)
+    resource_type = Column(String(100), primary_key=True, nullable=False)
+    vars = Column(String(10000))
     owner = Column(String(1000))
     proxy_url = Column(String(1000))
+    proxy_type = Column(String(20))
 
     def __repr__(self):
-        return self.name
+        return f'{self.resource_type}: {self.name}'
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
