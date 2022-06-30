@@ -1,0 +1,54 @@
+pid /tmp/nginx.pid;
+
+worker_processes 4;
+worker_rlimit_nofile 1047552;
+worker_shutdown_timeout 240s ;
+
+events {
+        multi_accept        on;
+        worker_connections  16384;
+        use                 epoll;
+}
+
+http {
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        ''      close;
+    }
+
+    proxy_redirect          off;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    client_max_body_size    10m;
+    client_body_buffer_size 128k;
+    proxy_connect_timeout   90;
+    proxy_send_timeout      90;
+    proxy_read_timeout      90;
+    proxy_buffers           32 4k;
+    resolver                172.27.0.10 valid=30s ipv6=off;
+    keepalive_timeout       60;
+
+    default_type application/octet-stream;
+    log_format   main '$remote_addr - $remote_user [$time_local]  $status '
+        '"$request" $body_bytes_sent "$http_referer" '
+        '"$http_user_agent" [$http_connection] [$http_upgrade] "$http_x_forwarded_for"';
+    access_log   /dev/stdout  main;
+    sendfile     on;
+    tcp_nopush   on;
+    server_names_hash_bucket_size 128; # this seems to be required for some vhosts
+    server {
+            listen 80 default_server;
+{{ range $k, $v := .Routes }}
+            location {{$k}} {
+{{ if not (index $.Rewrites $k) }}
+              proxy_set_header Host $http_host;
+{{ end }}
+              set $backend_servers {{$v}};
+              proxy_http_version      1.1;
+              proxy_set_header        Upgrade         $http_upgrade;
+              proxy_set_header        Connection      $connection_upgrade;
+              proxy_pass $backend_servers;
+            }
+{{- end }}
+    }
+}
