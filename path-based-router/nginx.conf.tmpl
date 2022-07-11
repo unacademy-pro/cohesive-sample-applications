@@ -36,19 +36,141 @@ http {
     sendfile     on;
     tcp_nopush   on;
     server_names_hash_bucket_size 128; # this seems to be required for some vhosts
+
     server {
-            listen 80 default_server;
-{{ range $k, $v := .Routes }}
-            location {{$k}} {
-{{ if not (index $.Rewrites $k) }}
-              proxy_set_header Host $http_host;
-{{ end }}
-              set $backend_servers {{$v}};
-              proxy_http_version      1.1;
-              proxy_set_header        Upgrade         $http_upgrade;
-              proxy_set_header        Connection      $connection_upgrade;
-              proxy_pass $backend_servers;
-            }
-{{- end }}
-    }
+        listen 80;
+        listen [::]:80;
+        server_name dev-frontend.relevel.com;
+        underscores_in_headers on;
+        set $jobs_server {{.JobsServer}};
+        set $cms_server {{.CMSServer}};
+
+      location = / {
+        if ($cookie_isSlotBooked = "true") {
+            rewrite ^/$ $scheme://$host/dashboard/home;
+        }
+        proxy_pass https://$cms_server;
+      }
+
+      location = /partnerships {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /select-category {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /test {
+        proxy_pass https://$jobs_server;
+      }
+
+      location = /courses {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /404 {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /500 {
+        proxy_pass https://$cms_server;
+      }
+
+	  location = /privacy-policy {
+		proxy_pass https://$cms_server;
+      }
+
+      location = /terms-and-conditions {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /company {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /robots.txt {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /sw.js {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /sw.js.map {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /manifest.json {
+        proxy_pass https://$cms_server;
+      }
+
+      location = /favicon.svg {
+        proxy_pass https://$cms_server;
+      }
+
+      location ~^/lottie {
+        proxy_pass https://$cms_server;
+      }
+
+      location ~^/icons {
+        proxy_pass https://$cms_server;
+      }
+
+      location ~^/images {
+        proxy_pass https://$cms_server;
+      }
+
+      location ~* /workbox-.*.js {
+        proxy_pass https://$cms_server;
+      }
+
+      location ~^/profile/u {
+            proxy_pass https://$cms_server;
+      }
+
+      location ~*(.*)/booking$ {
+        proxy_pass https://$cms_server;
+      }
+
+      location ~* (/_next/data/cms-build-*/?.*)$  {
+            proxy_pass https://$cms_server;
+      }
+
+      location ~* (?<begin>.*courses)/(?<end>.*)$ {
+		proxy_pass https://$cms_server;
+	  }
+
+	location ~* (/dashboard/test/?.*)$ {
+		proxy_pass https://$jobs_server;
+	}
+
+	location ~* (?<begin>.*test)/(.*)/(?<end>.*)$ {
+		proxy_pass https://$jobs_server;
+	}
+
+  location ~* (?<begin>.*test)/(?<end>.*)$ {
+		proxy_pass https://$cms_server;
+  }
+
+	location ~* (?<begin>.*/jobs)/(?<end>.*)$ {
+		proxy_pass   https://$jobs_server/$end;
+	}
+
+	location /cms-next-images/ {
+		proxy_pass   https://$cms_server/;
+	}
+
+	location ~* (/company/(.*)/(.*)/?.*)$ {
+		proxy_pass https://$cms_server;
+	}
+
+	location ~ \.(xml)$ {
+		proxy_pass https://$cms_server;
+	}
+
+	location / {
+		proxy_pass https://$jobs_server;
+	}
+
+  }
 }
