@@ -156,8 +156,11 @@ http {
 		proxy_pass   https://$jobs_server/$end;
 	}
 
-	location /cms-next-images/ {
-		proxy_pass   https://$cms_server/;
+	location  /cms-next-images {
+	    rewrite /cms-next-images/(.*) /$1  break;
+	    proxy_pass         https://$cms_server;
+	    proxy_redirect     off;
+	    proxy_set_header   Host $host;
 	}
 
 	location ~* (/company/(.*)/(.*)/?.*)$ {
